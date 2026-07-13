@@ -1,5 +1,5 @@
-// const API_BASE = 'http://127.0.0.1:8000';
-const API_BASE = 'https://hospital-management-system-backend.onrender.com'; // Replace with your Render URL
+const API_BASE = 'https://neat-spiders-type.loca.lt';
+// const API_BASE = 'https://hospital-management-system-backend.onrender.com'; // Replace with your Render URL
 
 async function fetchData(endpoint) {
     try {
