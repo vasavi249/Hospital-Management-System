@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Records - HMS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🏥 HMS</h2>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="patients.html">Patients</a>
+        <a href="doctors.html">Doctors</a>
+        <a href="appointments.html">Appointments</a>
+        <a href="records.html" class="active">Medical Records</a>
+        <a href="billing.html">Billing</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Medical Records</h1>
+                <p style="color: var(--text-muted); margin-top: 5px;">Maintain accurate patient history, clinical diagnoses, and prescribed treatments.</p>
+            </div>
+            <button class="btn" onclick="openModal('recordModal')">+ Add Record</button>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Diagnosis</th>
+                        <th>Prescription</th>
+                        <th>Treatment</th>
+                        <th>Visit Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="recordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Medical Record</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="recordForm">
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex:1">
+                        <label>Patient Name</label>
+                        <input type="text" name="patient_name" required>
+                    </div>
+                    <div style="flex:1">
+                        <label>Doctor Name</label>
+                        <input type="text" name="doctor_name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Diagnosis</label>
+                    <input type="text" name="diagnosis" required>
+                </div>
+                <div class="form-group">
+                    <label>Prescription</label>
+                    <textarea name="prescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Treatment</label>
+                    <textarea name="treatment" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Visit Date</label>
+                    <input type="date" name="visit_date" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('recordModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        async function loadData() {
+            const data = await fetchData('/records/');
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.record_id}</td>
+                        <td>${item.patient_name}</td>
+                        <td>${item.doctor_name}</td>
+                        <td>${item.diagnosis}</td>
+                        <td>${item.prescription}</td>
+                        <td>${item.treatment}</td>
+                        <td>${item.visit_date}</td>
+                        <td class="actions">
+                            <button class="btn btn-small btn-danger" onclick="deleteData(${item.record_id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('recordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            await postData('/records/add/', data);
+            closeModal('recordModal');
+            e.target.reset();
+            loadData();
+        });
+
+        async function deleteData(id) {
+            if(confirm('Are you sure?')) {
+                await postData(`/records/delete/${id}/`, {}, 'DELETE');
+                loadData();
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>

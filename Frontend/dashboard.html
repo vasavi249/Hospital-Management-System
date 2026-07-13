@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🏥 HMS</h2>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="patients.html">Patients</a>
+        <a href="doctors.html">Doctors</a>
+        <a href="appointments.html">Appointments</a>
+        <a href="records.html">Medical Records</a>
+        <a href="billing.html">Billing</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p style="color: var(--text-muted); margin-top: 5px;">Overview of hospital operations and daily statistics.</p>
+            </div>
+        </div>
+        
+        <div class="dashboard-cards">
+            <div class="card">
+                <h3>Total Patients</h3>
+                <div class="value" id="total-patients">0</div>
+            </div>
+            <div class="card">
+                <h3>Total Doctors</h3>
+                <div class="value" id="total-doctors">0</div>
+            </div>
+            <div class="card">
+                <h3>Total Appointments</h3>
+                <div class="value" id="total-appointments">0</div>
+            </div>
+            <div class="card">
+                <h3>Total Revenue</h3>
+                <div class="value" id="total-revenue">$0</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        async function loadDashboard() {
+            const patients = await fetchData('/patients/');
+            document.getElementById('total-patients').textContent = patients.length || 0;
+            
+            const doctors = await fetchData('/doctors/');
+            document.getElementById('total-doctors').textContent = doctors.length || 0;
+            
+            const appointments = await fetchData('/appointments/');
+            document.getElementById('total-appointments').textContent = appointments.length || 0;
+
+            const bills = await fetchData('/bills/');
+            const revenue = (bills || []).reduce((sum, bill) => sum + parseFloat(bill.total_amount || 0), 0);
+            document.getElementById('total-revenue').textContent = `$${revenue.toFixed(2)}`;
+        }
+        loadDashboard();
+    </script>
+</body>
+</html>

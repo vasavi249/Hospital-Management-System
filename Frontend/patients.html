@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patients - HMS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🏥 HMS</h2>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="patients.html" class="active">Patients</a>
+        <a href="doctors.html">Doctors</a>
+        <a href="appointments.html">Appointments</a>
+        <a href="records.html">Medical Records</a>
+        <a href="billing.html">Billing</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Patients Management</h1>
+                <p style="color: var(--text-muted); margin-top: 5px;">Register new patients, view their details, and manage demographic information.</p>
+            </div>
+            <button class="btn" onclick="openModal('patientModal')">+ Add Patient</button>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Blood Group</th>
+                        <th>Address</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="patientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Patient</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="patientForm">
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" name="patient_name" required>
+                </div>
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex:1">
+                        <label>Age</label>
+                        <input type="number" name="age" required>
+                    </div>
+                    <div style="flex:1">
+                        <label>Gender</label>
+                        <select name="gender">
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Blood Group</label>
+                    <input type="text" name="blood_group" required>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea name="address" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('patientModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        async function loadData() {
+            const data = await fetchData('/patients/');
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.patient_id}</td>
+                        <td>${item.patient_name}</td>
+                        <td>${item.age}</td>
+                        <td>${item.gender}</td>
+                        <td>${item.phone}</td>
+                        <td>${item.email}</td>
+                        <td>${item.blood_group}</td>
+                        <td>${item.address}</td>
+                        <td class="actions">
+                            <button class="btn btn-small btn-danger" onclick="deleteData(${item.patient_id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            await postData('/patients/add/', data);
+            closeModal('patientModal');
+            e.target.reset();
+            loadData();
+        });
+
+        async function deleteData(id) {
+            if(confirm('Are you sure?')) {
+                await postData(`/patients/delete/${id}/`, {}, 'DELETE');
+                loadData();
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>

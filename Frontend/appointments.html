@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - HMS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🏥 HMS</h2>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="patients.html">Patients</a>
+        <a href="doctors.html">Doctors</a>
+        <a href="appointments.html" class="active">Appointments</a>
+        <a href="records.html">Medical Records</a>
+        <a href="billing.html">Billing</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Appointments</h1>
+                <p style="color: var(--text-muted); margin-top: 5px;">Schedule and track patient consultations with doctors. Update statuses in real-time.</p>
+            </div>
+            <button class="btn" onclick="openModal('appointmentModal')">+ Book Appointment</button>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient Name</th>
+                        <th>Doctor Name</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="appointmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Book Appointment</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" name="patient_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Doctor Name</label>
+                    <input type="text" name="doctor_name" required>
+                </div>
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex:1">
+                        <label>Date</label>
+                        <input type="date" name="appointment_date" required>
+                    </div>
+                    <div style="flex:1">
+                        <label>Time</label>
+                        <input type="time" name="appointment_time" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="appointment_status">
+                        <option>Scheduled</option>
+                        <option>Completed</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('appointmentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success">Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        async function loadData() {
+            const data = await fetchData('/appointments/');
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.appointment_id}</td>
+                        <td>${item.patient_name}</td>
+                        <td>${item.doctor_name}</td>
+                        <td>${item.appointment_date}</td>
+                        <td>${item.appointment_time}</td>
+                        <td><span style="padding:4px 8px;border-radius:4px;background:#e2e8f0;font-size:0.8rem">${item.appointment_status}</span></td>
+                        <td class="actions">
+                            <button class="btn btn-small btn-danger" onclick="deleteData(${item.appointment_id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            await postData('/appointments/add/', data);
+            closeModal('appointmentModal');
+            e.target.reset();
+            loadData();
+        });
+
+        async function deleteData(id) {
+            if(confirm('Are you sure?')) {
+                await postData(`/appointments/delete/${id}/`, {}, 'DELETE');
+                loadData();
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>

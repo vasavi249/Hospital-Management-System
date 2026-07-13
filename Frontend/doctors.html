@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors - HMS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🏥 HMS</h2>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="patients.html">Patients</a>
+        <a href="doctors.html" class="active">Doctors</a>
+        <a href="appointments.html">Appointments</a>
+        <a href="records.html">Medical Records</a>
+        <a href="billing.html">Billing</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Doctors Management</h1>
+                <p style="color: var(--text-muted); margin-top: 5px;">Manage doctor profiles, assignments, and consultation fees across departments.</p>
+            </div>
+            <button class="btn" onclick="openModal('doctorModal')">+ Add Doctor</button>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Specialization</th>
+                        <th>Department</th>
+                        <th>Experience (Yrs)</th>
+                        <th>Phone</th>
+                        <th>Fee</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="doctorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Doctor</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="doctorForm">
+                <div class="form-group">
+                    <label>Doctor Name</label>
+                    <input type="text" name="doctor_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Specialization</label>
+                    <input type="text" name="specialization" required>
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" name="department" required>
+                </div>
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex:1">
+                        <label>Experience (Years)</label>
+                        <input type="number" name="experience" required>
+                    </div>
+                    <div style="flex:1">
+                        <label>Consultation Fee</label>
+                        <input type="number" name="consultation_fee" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('doctorModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        async function loadData() {
+            const data = await fetchData('/doctors/');
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.doctor_id}</td>
+                        <td>${item.doctor_name}</td>
+                        <td>${item.specialization}</td>
+                        <td>${item.department}</td>
+                        <td>${item.experience}</td>
+                        <td>${item.phone}</td>
+                        <td>$${item.consultation_fee}</td>
+                        <td class="actions">
+                            <button class="btn btn-small btn-danger" onclick="deleteData(${item.doctor_id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('doctorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            await postData('/doctors/add/', data);
+            closeModal('doctorModal');
+            e.target.reset();
+            loadData();
+        });
+
+        async function deleteData(id) {
+            if(confirm('Are you sure?')) {
+                await postData(`/doctors/delete/${id}/`, {}, 'DELETE');
+                loadData();
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
