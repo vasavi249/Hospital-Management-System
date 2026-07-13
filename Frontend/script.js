@@ -1,4 +1,4 @@
-const API_BASE = ' https://shaggy-towns-cough.loca.lt';
+const API_BASE = 'https://shaggy-towns-cough.loca.lt';
 // const API_BASE = 'https://hospital-management-system-backend.onrender.com'; // Replace with your Render URL
 
 async function fetchData(endpoint) {
