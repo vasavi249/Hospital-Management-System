@@ -1,11 +1,12 @@
-const API_BASE = 'http://127.0.0.1:8000';
+// const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = 'https://hospital-management-system-backend.onrender.com'; // Replace with your Render URL
 
 async function fetchData(endpoint) {
     try {
         // Prevent browser caching by appending a timestamp and using no-store
         const url = new URL(`${API_BASE}${endpoint}`);
         url.searchParams.append('_t', new Date().getTime());
-        
+
         const response = await fetch(url.toString(), { cache: 'no-store' });
         if (!response.ok) {
             alert(`Server Error (${response.status}) when fetching data. Check backend logs.`);
@@ -46,7 +47,7 @@ function closeModal(modalId) {
 }
 
 document.querySelectorAll('.close-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
         this.closest('.modal').classList.remove('active');
     });
 });
